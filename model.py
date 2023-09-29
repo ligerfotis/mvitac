@@ -228,7 +228,7 @@ class MultiModalMoCo(nn.Module):
         logits = torch.cat([logits_vis_intra, logits_tact_intra, logits_vis_tac_inter, logits_tac_vis_inter], dim=0)
         labels = torch.cat(
             [labels_vis_intra, labels_tac_intra, labels_vision_tactile_inter, labels_tactile_vision_inter], dim=0)
-        return combined_loss, logits, labels
+        return combined_loss, vis_loss_intra, tac_loss_intra, vis_tac_inter, tac_vis_inter, logits, labels
 
     def log_losses(self, epoch, i, len_train_dataloader, vision_loss_intra, tactile_loss_intra, vision_tactile_inter,
                    tactile_vision_inter):
