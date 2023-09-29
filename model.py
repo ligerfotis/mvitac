@@ -4,6 +4,7 @@ from torchvision import models
 import wandb
 import torch.nn.functional as F
 
+
 def moco_contrastive_loss(q, k, T):
     """
     Compute the contrastive loss between query (q) and key (k) representations.
@@ -20,7 +21,7 @@ def moco_contrastive_loss(q, k, T):
     k = nn.functional.normalize(k, dim=1)
     logits = torch.mm(q, k.T.detach()) / T
     labels = torch.arange(logits.shape[0], dtype=torch.long).to(q.device)
-    return nn.CrossEntropyLoss()(logits, labels)
+    return nn.CrossEntropyLoss()(logits, labels), logits, labels
 
 
 def info_nce_loss(q, k, T):
@@ -57,6 +58,7 @@ def info_nce_loss(q, k, T):
     logits = logits / T
     loss = torch.nn.CrossEntropyLoss().to(device)(logits, labels)
     return loss, logits, labels
+
 
 @torch.no_grad()
 def momentum_update_key_encoder(base_q, base_k, head_intra_q, head_intra_k, m):
@@ -111,8 +113,8 @@ class MultiModalMoCo(nn.Module):
         self.pretrained_encoder = pretrained_encoder
 
         # Define vision modality encoders
-        self.vision_base_q, self.vision_head_intra_q, self.vision_head_inter_q = self.create_encoder(n_channels)
-        self.vision_base_k, self.vision_head_intra_k, self.vision_head_inter_k = self.create_encoder(n_channels)
+        self.vision_base_q, self.vision_head_intra_q, self.vision_head_inter_q = self.create_encoder(n_channels=3)
+        self.vision_base_k, self.vision_head_intra_k, self.vision_head_inter_k = self.create_encoder(n_channels=3)
 
         # Define tactile modality encoders
         self.tactile_base_q, self.tactile_head_intra_q, self.tactile_head_inter_q = self.create_encoder(n_channels)
@@ -120,9 +122,9 @@ class MultiModalMoCo(nn.Module):
 
         # Initialize key encoders with query encoder weights
         momentum_update_key_encoder(self.vision_base_q, self.vision_base_k, self.vision_head_intra_q,
-                                          self.vision_head_intra_k)
+                                    self.vision_head_intra_k, self.m)
         momentum_update_key_encoder(self.tactile_base_q, self.tactile_base_k, self.tactile_head_intra_q,
-                                          self.tactile_head_intra_k)
+                                    self.tactile_head_intra_k, self.m)
 
     def create_encoder(self, n_channels):
         """
@@ -203,17 +205,14 @@ class MultiModalMoCo(nn.Module):
             tac_keys_inter = self.tactile_head_inter_k(tactile_base_k)
 
         # Compute the contrastive loss for each pair of queries and keys
-        # vision_loss_intra = moco_contrastive_loss(vision_queries_intra, vision_keys_intra, self.T)
-        # tactile_loss_intra = moco_contrastive_loss(tactile_queries_intra, tactile_keys_intra, self.T)
-        # vision_tactile_inter = moco_contrastive_loss(vision_queries_inter, tactile_keys_inter, self.T)
-        # tactile_vision_inter = moco_contrastive_loss(tactile_queries_inter, vision_keys_inter, self.T)
-        vis_loss_intra, logits_vis_intra, labels_vis_intra = info_nce_loss(vis_queries_intra, vis_keys_intra, self.T)
-        tac_loss_intra, logits_tact_intra, labels_tac_intra = info_nce_loss(tac_queries_intra, tac_keys_intra, self.T)
-        vis_tac_inter, logits_vis_tac_inter, labels_vision_tactile_inter = info_nce_loss(vis_queries_inter,
-                                                                                         tac_keys_inter, self.T)
-        tac_vis_inter, logits_tac_vis_inter, labels_tactile_vision_inter = info_nce_loss(tac_queries_inter,
-                                                                                         vis_keys_inter, self.T)
-
+        vis_loss_intra, logits_vis_intra, labels_vis_intra = moco_contrastive_loss(vis_queries_intra, vis_keys_intra,
+                                                                                   self.T)
+        tac_loss_intra, logits_tact_intra, labels_tac_intra = moco_contrastive_loss(tac_queries_intra, tac_keys_intra,
+                                                                                    self.T)
+        vis_tac_inter, logits_vis_tac_inter, labels_vision_tactile_inter = moco_contrastive_loss(vis_queries_inter,
+                                                                                                 tac_keys_inter, self.T)
+        tac_vis_inter, logits_tac_vis_inter, labels_tactile_vision_inter = moco_contrastive_loss(tac_queries_inter,
+                                                                                                 vis_keys_inter, self.T)
 
         # Combine losses
         combined_loss = (self.weight_intra_vision * vis_loss_intra
@@ -227,7 +226,8 @@ class MultiModalMoCo(nn.Module):
         # momentum_update_key_encoder(self.tactile_base_q, self.tactile_base_k, self.tactile_head_intra_q,
         #                             self.tactile_head_intra_k, self.m)
         logits = torch.cat([logits_vis_intra, logits_tact_intra, logits_vis_tac_inter, logits_tac_vis_inter], dim=0)
-        labels = torch.cat([labels_vis_intra, labels_tac_intra, labels_vision_tactile_inter, labels_tactile_vision_inter], dim=0)
+        labels = torch.cat(
+            [labels_vis_intra, labels_tac_intra, labels_vision_tactile_inter, labels_tactile_vision_inter], dim=0)
         return combined_loss, logits, labels
 
     def log_losses(self, epoch, i, len_train_dataloader, vision_loss_intra, tactile_loss_intra, vision_tactile_inter,

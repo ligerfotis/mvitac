@@ -81,11 +81,16 @@ class CalandraLabel(Dataset):
         modality_path = subset_path / 'gelsightA'
 
         # Loop over each file in the category and add it to the samples list
-        for img_file in modality_path.glob("*.png"):
-            object_name, is_success, modality, phase, id = img_file.stem.split('_')
+        for img_file in modality_path.iterdir():
+            if img_file.suffix in [".png"]:
+                id = img_file.stem.split('_')[-1]
+                phase = img_file.stem.split('_')[-2]
+                modality = img_file.stem.split('_')[-3]
+                is_success = img_file.stem.split('_')[-4]
+                object_name = '_'.join(img_file.stem.split('_')[:-4])
 
-            if self.subset == "test" and phase != "during":
-                continue
+                if self.subset == "test" and phase != "during":
+                    continue
 
             # Construct the paths for each modality
             paths = {
