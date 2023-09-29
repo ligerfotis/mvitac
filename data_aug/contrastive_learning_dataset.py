@@ -41,7 +41,7 @@ class ContrastiveLearningDataset:
                           'calandra_label': lambda: CalandraLabel(self.root_folder,
                                                                   transform=ContrastiveLearningViewGenerator(
                                                                       self.get_dafault_transform(224),
-                                                                      n_views), mode='test')
+                                                                      n_views), mode='train')
                           }
 
         try:
