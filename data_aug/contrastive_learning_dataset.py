@@ -32,16 +32,27 @@ class ContrastiveLearningDataset:
                                               # transforms.RandomGrayscale(p=0.2),
                                               ])
         return data_transforms
+    def get_test_transform(self, size):
+        # only resize and normalize
+        data_transforms = transforms.Compose([transforms.ToTensor(),
+                                              transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                   std=[0.229, 0.224, 0.225]),
+                                              ])
+        return data_transforms
 
     def get_dataset(self, name, n_views):
         valid_datasets = {'tag': lambda: TouchFolderLabel(self.root_folder,
                                                           transform=ContrastiveLearningViewGenerator(
                                                               self.get_dafault_transform(224), n_views),
                                                           mode='pretrain'),
-                          'calandra_label': lambda: CalandraLabel(self.root_folder,
+                          'calandra_label_train': lambda: CalandraLabel(self.root_folder,
                                                                   transform=ContrastiveLearningViewGenerator(
                                                                       self.get_dafault_transform(224),
-                                                                      n_views), mode='train')
+                                                                      n_views), mode='train'),
+                          'calandra_label_test': lambda: CalandraLabel(self.root_folder,
+                                                                        transform=ContrastiveLearningViewGenerator(
+                                                                            self.get_test_transform(224),
+                                                                            n_views), mode='test')
                           }
 
         try:

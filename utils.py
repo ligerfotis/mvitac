@@ -143,4 +143,5 @@ class GaussianBlur(object):
 
 
 def save_checkpoint(state, filename='checkpoint.pth.tar'):
+    # save both the vision and tactile models
     torch.save(state, filename)
