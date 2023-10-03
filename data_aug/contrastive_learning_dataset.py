@@ -32,6 +32,7 @@ class ContrastiveLearningDataset:
                                               # transforms.RandomGrayscale(p=0.2),
                                               ])
         return data_transforms
+
     def get_test_transform(self, size):
         # only resize and normalize
         data_transforms = transforms.Compose([transforms.ToTensor(),
@@ -41,18 +42,23 @@ class ContrastiveLearningDataset:
         return data_transforms
 
     def get_dataset(self, name, n_views):
-        valid_datasets = {'tag': lambda: TouchFolderLabel(self.root_folder,
-                                                          transform=ContrastiveLearningViewGenerator(
-                                                              self.get_dafault_transform(224), n_views),
-                                                          mode='pretrain'),
+        valid_datasets = {'tag_train': lambda: TouchFolderLabel(self.root_folder,
+                                                                transform=ContrastiveLearningViewGenerator(
+                                                                    self.get_dafault_transform(224), n_views),
+                                                                mode='pretrain'),
+                          'tag_test': lambda: TouchFolderLabel(self.root_folder,
+                                                               transform=ContrastiveLearningViewGenerator(
+                                                                   self.get_test_transform(224), n_views),
+                                                               mode='test'),
+
                           'calandra_label_train': lambda: CalandraLabel(self.root_folder,
-                                                                  transform=ContrastiveLearningViewGenerator(
-                                                                      self.get_dafault_transform(224),
-                                                                      n_views), mode='train'),
-                          'calandra_label_test': lambda: CalandraLabel(self.root_folder,
                                                                         transform=ContrastiveLearningViewGenerator(
-                                                                            self.get_test_transform(224),
-                                                                            n_views), mode='test')
+                                                                            self.get_dafault_transform(224),
+                                                                            n_views), mode='train'),
+                          'calandra_label_test': lambda: CalandraLabel(self.root_folder,
+                                                                       transform=ContrastiveLearningViewGenerator(
+                                                                           self.get_test_transform(224),
+                                                                           n_views), mode='test')
                           }
 
         try:
