@@ -4,8 +4,6 @@ import numpy as np
 import wandb
 from torch import nn
 from torchvision.transforms import transforms
-from config import CONFIG
-
 
 def denormalize(tensor, mean, std):
     """Denormalizes a tensor based on the provided mean and std."""
@@ -22,41 +20,6 @@ def compute_tsne(model, test_dataloader, epoch):
 def find_knn(query_point, data_points, k=5):
     """Finds the k-nearest neighbors of a query point."""
     pass
-
-
-def evaluate_and_plot(model, test_dataloader, epoch, device):
-    model.eval()
-
-    with torch.no_grad():
-        test_data_list = list(test_dataloader)
-        x_vision_test, x_tactile_test = random.choice(test_data_list)
-        random_indices = random.sample(range(x_vision_test.shape[0]), 4)
-        x_vision_test = x_vision_test[random_indices].to(device)
-        x_tactile_test = x_tactile_test[random_indices].to(device)
-
-    with torch.no_grad():
-        test_loss = model(x_vision_test, x_vision_test, x_tactile_test, x_tactile_test, epoch, 0, 0)
-
-    denorm_mean = CONFIG['denorm_mean']
-    denorm_std = CONFIG['denorm_std']
-    # Denormalize vision images
-    x_vision_test_denorm = denormalize(x_vision_test.clone(), denorm_mean, denorm_std)
-    x_vision_test_denorm = x_vision_test_denorm.cpu().numpy()
-    x_vision_test_denorm = np.clip(x_vision_test_denorm, 0, 1)
-
-    # Denormalize tactile images
-    x_tactile_test_denorm = denormalize(x_tactile_test.clone(), denorm_mean, denorm_std)
-    x_tactile_test_denorm = x_tactile_test_denorm.cpu().numpy()
-    x_tactile_test_denorm = np.clip(x_tactile_test_denorm, 0, 1)
-
-    x_vision_test_denorm = x_vision_test_denorm.transpose(0, 2, 3, 1)
-    x_tactile_test_denorm = x_tactile_test_denorm.transpose(0, 2, 3, 1)
-    wandb.log({
-        "Vision_Images": [wandb.Image(img_tensor) for img_tensor in x_vision_test_denorm],
-        "Tactile_Images": [wandb.Image(img_tensor) for img_tensor in x_tactile_test_denorm]
-    }, commit=False)
-    wandb.log({"testing loss": test_loss.item()}, step=epoch * len(test_dataloader))
-    print(f"Test Loss: {test_loss.item():.4f}")
 
 
 class AverageMeter(object):
