@@ -1,18 +1,18 @@
+# Import necessary libraries for image processing and dataset creation
 from __future__ import print_function
-
 from PIL import Image
-
 import torch
 import os
 from pathlib import Path
 from torch.utils.data import Dataset
 
-
+# Dataset class for images with labels
 class TouchFolderLabel(Dataset):
     """Folder datasets which returns the index of the image as well."""
 
     def __init__(self, root, transform=None, target_transform=None, two_crop=False,
-                 mode='train', label='full', data_amount=100):
+                 mode='train', label='full'):
+        # Initialize parameters
         self.two_crop = two_crop
         self.dataroot = Path('/home/vedant/dataset/')
         self.mode = mode
@@ -20,19 +20,20 @@ class TouchFolderLabel(Dataset):
         self.target_transform = target_transform
         self.label = label
 
-        # Read appropriate data based on mode and label
+        # Construct path to the data file based on the mode and label
         if label == 'rough' and mode in ['train', 'test']:
             data_file = os.path.join(root, f'{mode}_rough.txt')
         else:
             data_file = os.path.join(root, f'{mode}.txt')
 
+        # Read file lines into env list
         with open(data_file, 'r') as f:
             self.env = [line.strip() for line in f.readlines()]
-
+        # Set dataset length
         self.length = len(self.env)
 
     def __getitem__(self, index):
-        """Returns the image, target, and index."""
+        # Return the image, its label, and index based on the given index
         assert index < self.length, 'index_A range error'
 
         raw, target = self.env[index].split(',')
@@ -59,9 +60,7 @@ class TouchFolderLabel(Dataset):
 
         # out = torch.cat((A_img, A_gel), dim=0)
 
-        # if self.mode == 'pretrain':
-        #     return A_img, A_gel, target, index
-
+        # Return image and label
         return A_img, A_gel, target
 
     def __len__(self):
@@ -70,7 +69,8 @@ class TouchFolderLabel(Dataset):
 
 
 class CalandraLabel(Dataset):
-    def __init__(self, root_dir, transform=None, train=True, mode='train'):
+    def __init__(self, root_dir, transform=None, mode='train'):
+        # Initialize dataset parameters
         self.root_dir = Path(root_dir)
         self.transform = transform
         self.subset = "train" if mode == "train" else "test"
@@ -107,6 +107,7 @@ class CalandraLabel(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
+        # Return images and labels based on the given index
         gelA_path, gelB_path, rgb_path = self.samples[idx]
 
         # Load images
@@ -126,4 +127,5 @@ class CalandraLabel(Dataset):
         label = torch.tensor(1 if "success" in gelA_path.name else 0, dtype=torch.long)
 
         # image = torch.cat((stacked_gelsight_images, rgb_image), dim=0)
+        # Return processed images and label
         return rgb_image_q, rgb_image_k, stacked_gelsight_images_q, stacked_gelsight_images_k, label
