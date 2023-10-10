@@ -14,7 +14,7 @@ class TouchFolderLabel(Dataset):
                  mode='train', label='full'):
         # Initialize parameters
         self.two_crop = two_crop
-        self.dataroot = Path('/home/vedant/dataset/')
+        self.dataroot = Path(root)
         self.mode = mode
         self.transform = transform
         self.target_transform = target_transform
@@ -51,17 +51,17 @@ class TouchFolderLabel(Dataset):
         A_gelsight_path = dir_path / 'gelsight_frame' / idx
 
         # Load image and gelsight
-        A_img = Image.open(A_img_path).convert('RGB')
-        A_gel = Image.open(A_gelsight_path).convert('RGB')
+        A_img= Image.open(A_img_path).convert('RGB')
+        A_gel= Image.open(A_gelsight_path).convert('RGB')
 
         if self.transform:
-            A_img = self.transform(A_img)
-            A_gel = self.transform(A_gel)
+            A_img_q, A_img_k = self.transform(A_img)
+            A_gel_q, A_gel_k = self.transform(A_gel)
 
         # out = torch.cat((A_img, A_gel), dim=0)
 
         # Return image and label
-        return A_img, A_gel, target
+        return A_img_q, A_img_k, A_gel_q, A_gel_k, target
 
     def __len__(self):
         """Return the total number of images."""
