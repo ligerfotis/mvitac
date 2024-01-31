@@ -1,6 +1,8 @@
 
 # MViTac: Multimodal Visual-Tactile Representation Learning through Self-Supervised Contrastive Pre-Training
 
+The repository was jointly developed with [Vedant Dave](https://github.com/VDML97)
+
 [Project Website](https://sites.google.com/view/mvitac/home)
 
 This repository contains the implementation for training and evaluating the MVitAC model. The model is trained using contrastive learning on the Calandra dataset. The code is developed and tested on **Ubuntu 22.04** with **Python 3.10**.
@@ -27,6 +29,16 @@ This repository contains the implementation for training and evaluating the MVit
 - Ensure the data paths in the configuration are correctly set.
 - Monitor the training progress to ensure convergence. Adjust hyperparameters in `config.py` if necessary.
 - For custom datasets, ensure they are structured correctly and update data paths in the configuration.
+
+# Cite
+    @misc{dave2024multimodal,
+      title={Multimodal Visual-Tactile Representation Learning through Self-Supervised Contrastive Pre-Training}, 
+      author={Vedant Dave and Fotios Lygerakis and Elmar Rueckert},
+      year={2024},
+      eprint={2401.12024},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+}
 
 ## License
 
