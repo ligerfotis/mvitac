@@ -5,7 +5,7 @@ The repository was jointly developed with [Vedant Dave](https://github.com/VDML9
 
 [Project Website](https://sites.google.com/view/mvitac/home)
 
-This repository contains the implementation for training and evaluating the MVitAC model. The model is trained using contrastive learning on the Calandra dataset. The code is developed and tested on **Ubuntu 22.04** with **Python 3.10**.
+This repository contains the implementation for training and evaluating the MVitAC model. The model is trained using contrastive learning on the Calandra dataset. The code was developed and tested on **Ubuntu 22.04** with **Python 3.10**.
 ## Overview
 
 1. **mvitac.ipynb**: This notebook contains the procedures for pretraining the MViTac model using contrastive learning. It covers configuration setup, model architecture, training, and evaluation.
