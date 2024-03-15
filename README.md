@@ -38,7 +38,7 @@ This repository contains the implementation for training and evaluating the MVit
       eprint={2401.12024},
       archivePrefix={arXiv},
       primaryClass={cs.RO}
-}
+    }
 
 ## License
 
