@@ -221,10 +221,10 @@ class MultiModalMoCo(nn.Module):
                          + self.weight_inter_vis_tac * tac_vis_inter)
 
         # # Perform momentum update during the forward pass
-        # momentum_update_key_encoder(self.vision_base_q, self.vision_base_k, self.vision_head_intra_q,
-        #                             self.vision_head_intra_k, self.m)
-        # momentum_update_key_encoder(self.tactile_base_q, self.tactile_base_k, self.tactile_head_intra_q,
-        #                             self.tactile_head_intra_k, self.m)
+        momentum_update_key_encoder(self.vision_base_q, self.vision_base_k, self.vision_head_intra_q,
+                                    self.vision_head_intra_k, self.m)
+        momentum_update_key_encoder(self.tactile_base_q, self.tactile_base_k, self.tactile_head_intra_q,
+                                    self.tactile_head_intra_k, self.m)
         logits = torch.cat([logits_vis_intra, logits_tact_intra, logits_vis_tac_inter, logits_tac_vis_inter], dim=0)
         labels = torch.cat(
             [labels_vis_intra, labels_tac_intra, labels_vision_tactile_inter, labels_tactile_vision_inter], dim=0)
