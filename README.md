@@ -24,6 +24,21 @@ This repository contains the implementation for training and evaluating the MVit
 4. **Evaluation**: Once the model is trained, use the `evaluate.ipynb` notebook to train a linear classifier on the top of the learned representations to evaluate its performance on test data.
 5. **Utilities**: The `utils.py` script contains helper functions. It's integrated into the training and evaluation notebooks, so there's no need to run it separately.
 
+## How to use - Docker
+
+As an alternative to the above steps, we used Docker to implement a straight-forward way to get this project running. The easiest way for a new user is the [Devcontainer Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) in the [Visual Studio Code IDE](https://code.visualstudio.com/). Hence, when you open this repository in Visual Studio code, it will ask you to open the workspace inside a container. Click yes.
+
+Also you might want to build the Docker image yourself and run it manually. Follow these steps:
+
+1. [Install](https://docs.docker.com/get-docker/) Docker obviously
+2. Clone this repository and cd into it
+3. Build the image: `docker build .devcontainer -t mvitac`
+4. Run the container: `docker run -it -p 8888:8888 -v ${PWD}:/home/mvitacdev/mvitacdev_ws mvitac bash`
+
+### Additional Notes - GPU
+You might want to [use your GPU inside of the container](https://github.com/NVIDIA/nvidia-container-toolkit).
+This part will be updated.
+
 ## Notes
 
 - Ensure the data paths in the configuration are correctly set.
